@@ -1,0 +1,14 @@
+npm install -g @nestjs/cli
+ nest new appName 
+ npx prisma  init
+
+ nest g res modules/auth
+  choose restApi
+
+npx  prisma migrate dev 
+npx prisma migrate reset
+-- note we have older versio of prsima <5 so 
+ npm install prisma@5.x -D; npm install @prisma/client@5.x
+
+npm i argon2 
+npm install --save @nestjs/jwt
