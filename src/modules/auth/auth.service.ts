@@ -21,12 +21,12 @@ export class AuthService {
     ...registerDTO, 
     password: hashedPassword
   });
-  const createdUserWithoutPassword =removeFields(createdUser, ['password']);
+  // const createdUserWithoutPassword =removeFields(createdUser, ['password']);
     //generate jwt token
     const token = this.generateJwtToken(createdUser.id, createdUser.role);
     
     //return user + token
-  return { user:createdUserWithoutPassword, token };
+  return { user:this.userService.mapUserWithoutPassword(createdUser), token };
   }
 
   async login(loginDto: LoginDTO): Promise<UserResponseDTO> {
@@ -60,6 +60,16 @@ export class AuthService {
 
     );
   }
-
-  
+      validate(userPayload: UserResponseDTO['user']) {
+    // generate jwt token
+    const token = this.generateJwtToken(
+      BigInt(userPayload.id),
+      userPayload.role,
+    );
+    // return user data + token
+    return {
+      user: userPayload,
+      token,
+    };
+  }
 }

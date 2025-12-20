@@ -3,6 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RegisterDTO } from '../auth/dto/auth.dto';
 import { DatabaseService } from '../database/database.service';
+import { removeFields } from 'src/utils/object.utils';
 
 @Injectable()
 export class UserService {
@@ -35,5 +36,8 @@ export class UserService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+  mapUserWithoutPassword(user) {
+    return removeFields(user, ['password']);
   }
 }

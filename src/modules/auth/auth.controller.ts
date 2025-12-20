@@ -1,7 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import type { LoginDTO, RegisterDTO,  UserResponseDTO } from './dto/auth.dto';
 import { User } from 'generated/prisma';
+
+interface AuthenticatedRequest extends Request {
+  user: any;
+}
 
 @Controller('auth')
 export class AuthController {
@@ -18,8 +22,8 @@ export class AuthController {
   }
 
   @Get('validate')
-  findAll() {
-    return this.authService.findAll();
+  validate(@Req() request: AuthenticatedRequest): UserResponseDTO {
+    return this.authService.validate(request.user!);
   }
 
 }
