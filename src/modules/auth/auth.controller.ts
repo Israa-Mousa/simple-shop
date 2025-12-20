@@ -15,7 +15,8 @@ export class AuthController {
   @Post('/register')
    @IsPublic()
   create(@Body() registerDTO: RegisterDTO):Promise<UserResponseDTO> {
-    return this.authService.register(registerDTO);
+    const createdUser = this.authService.register(registerDTO);
+    return createdUser;
   }
 
   @Post('/login')

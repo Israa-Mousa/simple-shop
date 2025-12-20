@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { RegisterDTO } from '../auth/dto/auth.dto';
 import { DatabaseService } from '../database/database.service';
 import { removeFields } from 'src/utils/object.utils';
@@ -23,21 +21,27 @@ export class UserService {
   }
 
   findAll() {
-    return `This action returns all user`;
+    return this.prismaService.user.findMany();
   }
 
-  findOne(id: number) {
+  findOne(id: bigint) {
     return `This action returns a #${id} user`;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
+  update(id: bigint,
+
+   ) {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
+  remove(id: bigint) {
     return `This action removes a #${id} user`;
   }
-  mapUserWithoutPassword(user) {
-    return removeFields(user, ['password']);
+  mapUserWithoutPasswordAndCastBigint(user: any) {
+    const withoutPassword = removeFields(user, ['password']) as any;
+    if (withoutPassword && Object.prototype.hasOwnProperty.call(withoutPassword, 'id')) {
+      withoutPassword.id = String(withoutPassword.id);
+    }
+    return withoutPassword;
   }
 }

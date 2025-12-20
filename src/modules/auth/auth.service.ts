@@ -28,7 +28,7 @@ export class AuthService {
     const token = this.generateJwtToken(createdUser.id, createdUser.role);
     
     //return user + token
-  return { user:this.userService.mapUserWithoutPassword(createdUser), token };
+  return { user:this.userService.mapUserWithoutPasswordAndCastBigint(createdUser), token };
   }
 
   async login(loginDto: LoginDTO): Promise<UserResponseDTO> {
@@ -39,11 +39,12 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
+  
     //generate jwt token
     const token = this.generateJwtToken(foundUser.id, foundUser.role);
-  
-    //return user + token
-    return { user: removeFields(foundUser, ['password']), token };
+
+    //return user + token (convert id to string)
+    return { user: this.userService.mapUserWithoutPasswordAndCastBigint(foundUser), token };
   }
 
   private hashPassword(password: string) {
@@ -54,12 +55,11 @@ export class AuthService {
     // Implement password verification logic here
     return argon.verify(hashedPassword, password);
   }
-  private generateJwtToken(userId: bigint, role:UserRole) {
-    // Implement JWT token generation logic here
-    return  this.jwtService.sign({
-       sub: userId, role },
-       { expiresIn: '30d' }
-
+  private generateJwtToken(userId: bigint | number | string, role: UserRole) {
+    const sub = typeof userId === 'bigint' ? userId.toString() : String(userId);
+    return this.jwtService.sign(
+      { sub, role },
+      { expiresIn: '30d' },
     );
   }
       validate(userPayload: UserResponseDTO['user']) {

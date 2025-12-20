@@ -6,7 +6,7 @@ export  type RegisterDTO = Omit<User ,'id'| 'createdAt' >;
 export type UserResponseDTO = 
 {
     token: string;
-    user: Omit<User, 'password'>;
+    user: Omit<User, 'password' |'id'> & { id: number } ;
 
 }
 

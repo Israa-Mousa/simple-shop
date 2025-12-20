@@ -11,15 +11,20 @@ import { AuthGuard } from './modules/auth/guards/auth.guard';
 @Module({
   imports: [AuthModule, UserModule, DatabaseModule,ConfigModule.forRoot({
       isGlobal: true,
-    })],
+    }),
+    
+  ],
   controllers: [AppController],
  providers: [
+    AppService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
+      
     },
+
     // {
-    //   provide: APP_GUARD,
+    //   provide: APP_GUARD, 
     //   useClass: RolesGuard,
     // },
   ],
