@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { LoginDTO, RegisterDTO, UserResponseDTO } from './dto/auth.dto';
 import * as argon from 'argon2';
 import { UserService } from '../user/user.service';
@@ -10,7 +11,8 @@ import { UserRole } from 'generated/prisma';
 export class AuthService {
   constructor(
     private userService:UserService,
-    private jwtService:JwtService
+    private jwtService:JwtService,
+    private configService:ConfigService<{JWT_SECRET:string}>,
    ) {}
   async register(registerDTO: RegisterDTO): Promise<UserResponseDTO>   {
     //hash password

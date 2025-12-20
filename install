@@ -12,3 +12,7 @@ npx prisma migrate reset
 
 npm i argon2 
 npm install --save @nestjs/jwt
+
+
+npm install @nestjs/config
+nest g gu modules/auth

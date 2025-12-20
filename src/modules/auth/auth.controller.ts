@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/
 import { AuthService } from './auth.service';
 import type { LoginDTO, RegisterDTO,  UserResponseDTO } from './dto/auth.dto';
 import { User } from 'generated/prisma';
+import { IsPublic } from 'src/decorators/public.decorator';
 
 interface AuthenticatedRequest extends Request {
   user: any;
@@ -12,11 +13,13 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/register')
+   @IsPublic()
   create(@Body() registerDTO: RegisterDTO):Promise<UserResponseDTO> {
     return this.authService.register(registerDTO);
   }
 
   @Post('/login')
+  @IsPublic()
   login(@Body() loginDto: LoginDTO): Promise<UserResponseDTO> {
     return this.authService.login(loginDto);
   }
