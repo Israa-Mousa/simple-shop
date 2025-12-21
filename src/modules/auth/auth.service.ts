@@ -56,9 +56,9 @@ export class AuthService {
     return argon.verify(hashedPassword, password);
   }
   private generateJwtToken(userId: bigint | number | string, role: UserRole) {
-    const sub = typeof userId === 'bigint' ? userId.toString() : String(userId);
+    //const sub = typeof userId === 'bigint' ? userId.toString() : String(userId);
     return this.jwtService.sign(
-      { sub, role },
+      { sub:String(userId), role },
       { expiresIn: '30d' },
     );
   }

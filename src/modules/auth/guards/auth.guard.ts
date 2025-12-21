@@ -49,7 +49,7 @@ export class AuthGuard implements CanActivate {
       // attach user to request
       request.user = {
         ...removeFields(user, ['password']),
-        id:Number(user.id),
+        id:String(user.id),
       };
     } catch {
       throw new UnauthorizedException();
