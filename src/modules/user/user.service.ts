@@ -3,7 +3,8 @@ import { RegisterDTO } from '../auth/dto/auth.dto';
 import { DatabaseService } from '../database/database.service';
 import { removeFields } from 'src/utils/object.utils';
 import type { PaginatedResult, PaginationQueryType } from '../auth/types/util.type';
-import { User } from 'generated/prisma';
+import { $Enums, User } from 'generated/prisma';
+import type { UpdateUserDTO } from './dto/user.dto';
 
 @Injectable()
 export class UserService {
@@ -48,13 +49,18 @@ export class UserService {
   findOne(id: bigint) {
   return this.prismaService.user.findUnique({
       where: {
-        id
+        id,
+        omit: { password: true },
       }
     }); 
   }
 
-  update(id: bigint) {
-    return `This action updates a #${id} user`;
+ update(id: bigint, userUpdatePayload: UpdateUserDTO) {
+    return this.prismaService.user.update({
+      where: { id },
+      data: userUpdatePayload,
+      // omit: { password: true },
+    });
   }
 
   remove(id: bigint) {
