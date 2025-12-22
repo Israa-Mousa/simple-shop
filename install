@@ -1,6 +1,7 @@
 npm install -g @nestjs/cli
  nest new appName 
  npx prisma  init
+ npx prisma studio
 
  nest g res modules/auth
   choose restApi
@@ -8,7 +9,8 @@ npm install -g @nestjs/cli
 npx  prisma migrate dev 
 npx prisma migrate reset
 -- note we have older versio of prsima <5 so 
- npm install prisma@5.x -D; npm install @prisma/client@5.x
+ npm install prisma@5.x -D; 
+ npm install @prisma/client@5.x
 
 npm i argon2 
 npm install --save @nestjs/jwt
@@ -18,3 +20,9 @@ npm install @nestjs/config
 nest g gu modules/auth
 
 npm install --save zod
+
+
+npm install @faker-js/faker --save-dev
+npm i -D tsx
+
+ npm run seed

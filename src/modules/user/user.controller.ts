@@ -1,5 +1,6 @@
-import { Controller, Get, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Patch, Param, Delete, Query } from '@nestjs/common';
 import { UserService } from './user.service';
+import type { PaginationQueryType } from '../auth/types/util.type';
 
 @Controller('user')
 export class UserController {
@@ -7,10 +8,14 @@ export class UserController {
 
 
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
+   @Get()
+  findAll(@Query() query: PaginationQueryType = { limit: 10, page: 1 }) {
+    return this.userService.findAll({
+      limit: Number(query.limit),
+      page: Number(query.page),
+    } as Required<PaginationQueryType>);
   }
+
 
   @Get(':id')
   findOne(@Param('id') id: bigint) {

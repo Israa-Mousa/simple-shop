@@ -13,11 +13,13 @@ interface AuthenticatedRequest extends Request {
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-@UsePipes(new ZodValidationPipe(registerValidationSchema))
-  @Post('/register')
-   @IsPublic()
-  create(@Body() registerDTO: RegisterDTO):Promise<UserResponseDTO> {
-    const createdUser = this.authService.register(registerDTO);
+ @Post('register')
+  @IsPublic()
+  async create(
+    @Body(new ZodValidationPipe(registerValidationSchema))
+    registerDTO: RegisterDTO,
+  ): Promise<UserResponseDTO> {
+    const createdUser = await this.authService.register(registerDTO);
     return createdUser;
   }
 
