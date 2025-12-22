@@ -31,20 +31,34 @@ export class AuthService {
   return { user:this.userService.mapUserWithoutPasswordAndCastBigint(createdUser), token };
   }
 
-  async login(loginDto: LoginDTO): Promise<UserResponseDTO> {
-    //find user by email
-    const foundUser = await this.userService.findByEmailOrThrow(loginDto.email);
-    //verify password with argon2
-    const isPasswordValid = await this.verifyPassword(loginDto.password, foundUser.password);
+   async login(loginDTO: LoginDTO): Promise<UserResponseDTO> {
+    // find user by email
+    const foundUser = await this.userService.findByEmail(loginDTO.email);
+
+    if (!foundUser) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // flag if policies allow this
+    if (foundUser.isDeleted) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    // verify password with argon
+    const isPasswordValid = await this.verifyPassword(
+      loginDTO.password,
+      foundUser.password,
+    );
+    // throw error if not match
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
-  
-    //generate jwt token
+    // generate jwt token
     const token = this.generateJwtToken(foundUser.id, foundUser.role);
-
-    //return user + token (convert id to string)
-    return { user: this.userService.mapUserWithoutPasswordAndCastBigint(foundUser), token };
+    // return user data + token
+    return {
+      user: this.userService.mapUserWithoutPasswordAndCastBigint(foundUser),
+      token,
+    };
   }
 
   private hashPassword(password: string) {

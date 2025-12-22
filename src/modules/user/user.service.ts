@@ -32,6 +32,15 @@ export class UserService {
         // omit: {
         //   password: true,
         // },
+        
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isDeleted: true,
+        createdAt: true,
+      }
       });
       const count = await prisma.user.count();
       return {
@@ -50,8 +59,14 @@ export class UserService {
   return this.prismaService.user.findUnique({
       where: {
         id,
-        omit: { password: true },
-      }
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isDeleted: true,
+      },
     }); 
   }
 
@@ -60,11 +75,21 @@ export class UserService {
       where: { id },
       data: userUpdatePayload,
       // omit: { password: true },
+       select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isDeleted: true,
+      },
+
     });
   }
-
-  remove(id: bigint) {
-    return `This action removes a #${id} user`;
+remove(id: bigint) {
+    return this.prismaService.user.update({
+      where: { id },
+      data: { isDeleted: true },
+    });
   }
   mapUserWithoutPasswordAndCastBigint(user: any) {
     const withoutPassword = removeFields(user, ['password']) as any;
@@ -72,5 +97,10 @@ export class UserService {
       withoutPassword.id = String(withoutPassword.id);
     }
     return withoutPassword;
+  }
+   findByEmail(email: string) {
+    return this.prismaService.user.findUnique({
+      where: { email },
+    });
   }
 }
