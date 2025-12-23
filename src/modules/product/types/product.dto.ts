@@ -1,6 +1,6 @@
-import { Prisma, Product } from 'generated/prisma';
+import { Product } from 'generated/prisma';
 
-export type CreateProductDTO = Pick<Product, 'name' | 'description'|'price'> & {
+export type CreateProductDTO = Pick<Product, 'name' | 'description'> & {
   price: number;
 };
 

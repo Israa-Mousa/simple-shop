@@ -26,3 +26,5 @@ npm install @faker-js/faker --save-dev
 npm i -D tsx
 
  npm run seed
+
+ npm i -D @types/multer
