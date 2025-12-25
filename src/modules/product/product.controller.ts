@@ -10,33 +10,37 @@ import {
   UseInterceptors,
   UploadedFile,
   Req,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { PaginationQueryType } from 'src/types/util.types';
 import type { ProductQuery } from './types/product.types';
-import type { CreateProductDTO, UpdateProductDTO } from './types/product.dto';
+import type { CreateProductDTO, ProductResponseDTO, UpdateProductDTO } from './types/product.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ZodValidationPipe } from 'src/pipe/zod-validation.pipe';
+import { productValidationSchema } from './util/proudct.validation.schema';
+import { Roles } from 'src/decorators/role.decorato';
 
 @Controller('product')
+@Roles(['MERCHANT'])
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
   // @UseInterceptors(FileInterceptor('file', { dest: './uploads' }))
   @UseInterceptors(FileInterceptor('file'))
-  create(
-    @Body() createProductDto: CreateProductDTO,
-     @UploadedFile()
-    
-    file: Express.Multer.File,
-      @Req() request: Express.Request,
-  ) {
-    console.log(file);
-    return 'file saved';
+ create(
+    @Body(new ZodValidationPipe(productValidationSchema))
+    createProductDto: CreateProductDTO,
+    @UploadedFile()
+    file: Express.Multer.File & { fileId?: string; url?: string },
+    @Req() request: Express.Request,
+  ):Promise<ProductResponseDTO> {
+    return this.productService.create(createProductDto,  request.user, file);
   }
 
 
-  
+    @Roles(['MERCHANT', 'CUSTOMER'])
  @Get()
   findAll(@Query() query: ProductQuery) {
     return this.productService.findAll({
@@ -45,15 +49,24 @@ export class ProductController {
       name: query.name,
     });
   }
-
+  @Roles(['MERCHANT', 'CUSTOMER'])
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.productService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDTO) {
-    return this.productService.update(+id, updateProductDto);
+  @UseInterceptors(FileInterceptor('file'))
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body(new ZodValidationPipe(productValidationSchema))
+    updatePayload: UpdateProductDTO,
+    @Req()
+    request: Express.Request,
+    @UploadedFile()
+    file?: Express.Multer.File,
+  ) {
+    return this.productService.update(id, updatePayload, request.user, file);
   }
 
   @Delete(':id')
