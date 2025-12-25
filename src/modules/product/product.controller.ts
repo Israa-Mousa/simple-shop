@@ -9,6 +9,7 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
+  Req,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { PaginationQueryType } from 'src/types/util.types';
@@ -28,6 +29,7 @@ export class ProductController {
      @UploadedFile()
     
     file: Express.Multer.File,
+      @Req() request: Express.Request,
   ) {
     console.log(file);
     return 'file saved';

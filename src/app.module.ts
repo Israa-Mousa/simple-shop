@@ -8,11 +8,13 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { ProductModule } from './modules/product/product.module';
+import { FileModule } from './modules/file/file.module';
 
 @Module({
-  imports: [AuthModule, UserModule, DatabaseModule,ConfigModule.forRoot({
+  imports: [AuthModule, UserModule
+    , DatabaseModule,ConfigModule.forRoot({
       isGlobal: true,
-    }), ProductModule,
+    }), ProductModule, FileModule,
     
   ],
   controllers: [AppController],
