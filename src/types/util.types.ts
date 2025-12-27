@@ -1,10 +1,10 @@
+import { Prisma } from "generated/prisma";
+
 export type PaginationQueryType = {
   page?: number;
   limit?: number;
 };
-
-export type PaginatedResult<T> = {
-  data: T[];
+export type PaginationResponseMeta = {
   meta: {
     total: number;
     page: number;
@@ -12,4 +12,10 @@ export type PaginatedResult<T> = {
     totalPages: number;
   };
 };
+export type PaginatedResult<T> = {
+  data: T[];
+
+} & PaginationResponseMeta
 //big  int 
+
+export type TransactionClient = Prisma.TransactionClient;

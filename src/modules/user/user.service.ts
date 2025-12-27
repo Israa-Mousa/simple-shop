@@ -22,39 +22,28 @@ export class UserService {
       }
     });
   }
-  findAll(
-    query: Required<PaginationQueryType>,
+    findAll(
+    query: PaginationQueryType,
   ): Promise<PaginatedResult<Omit<User, 'password'>>> {
     return this.prismaService.$transaction(async (prisma) => {
+      const pagination = this.prismaService.handleQueryPagination(query);
       const users = await prisma.user.findMany({
-        skip: (query.page - 1) * query.limit,
-        take: query.limit,
-        // omit: {
-        //   password: true,
-        // },
-        
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        isDeleted: true,
-        createdAt: true,
-      }
+        ...removeFields(pagination, ['page']),
+        omit: {
+          password: true,
+        },
       });
       const count = await prisma.user.count();
       return {
         data: users,
-        meta: {
-          total: count,
-          page: query.page,
-          limit: query.limit,
-          totalPages: Math.ceil(count / query.limit),
-        },
+        ...this.prismaService.formatPaginationResponse({
+          page: pagination.page,
+          count,
+          limit: pagination.take,
+        }),
       };
     });
   }
-
   findOne(id: bigint) {
   return this.prismaService.user.findUnique({
       where: {

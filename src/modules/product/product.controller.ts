@@ -18,7 +18,7 @@ import type { ProductQuery } from './types/product.types';
 import type { CreateProductDTO, ProductResponseDTO, UpdateProductDTO } from './types/product.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ZodValidationPipe } from 'src/pipe/zod-validation.pipe';
-import { productValidationSchema } from './util/proudct.validation.schema';
+import { productValidationSchema, updateProductValidationSchema } from './util/proudct.validation.schema';
 import { Roles } from 'src/decorators/role.decorato';
 
 @Controller('product')
@@ -55,17 +55,17 @@ export class ProductController {
     return this.productService.findOne(+id);
   }
 
-  @Patch(':id')
+ @Patch(':id')
   @UseInterceptors(FileInterceptor('file'))
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body(new ZodValidationPipe(productValidationSchema))
+    @Body(new ZodValidationPipe(updateProductValidationSchema))
     updatePayload: UpdateProductDTO,
     @Req()
     request: Express.Request,
     @UploadedFile()
     file?: Express.Multer.File,
-  ) {
+  ): Promise<ProductResponseDTO> {
     return this.productService.update(id, updatePayload, request.user, file);
   }
 
