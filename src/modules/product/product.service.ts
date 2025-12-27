@@ -6,6 +6,7 @@ import { Prisma, Product } from 'generated/prisma';
 import type { ProductResponseDTO } from './types/product.dto';
 import { FileService } from '../file/file.service';
 import { SideEffectQueue } from 'src/utils/side-effects';
+import { removeFields } from 'src/utils/object.utils';
 
 @Injectable()
 export class ProductService {
@@ -46,14 +47,14 @@ export class ProductService {
     include: { Asset: true },
   });
   }
-   findAll(query: Required<Omit<ProductQuery, 'name'>> & { name?: string }) {
+    findAll(query: ProductQuery) {
     return this.prismaService.$transaction(async (prisma) => {
       const whereClause: Prisma.ProductWhereInput = query.name
         ? { name: { contains: query.name } }
         : {};
+      const pagination = this.prismaService.handleQueryPagination(query);
       const proucts = await prisma.product.findMany({
-        skip: (query.page - 1) * query.limit,
-        take: query.limit,
+        ...removeFields(pagination, ['page']),
         where: whereClause,
       });
       const count = await prisma.product.count({
@@ -61,18 +62,18 @@ export class ProductService {
       });
       return {
         data: proucts,
-        meta: {
-          total: count,
-          page: query.page,
-          limit: query.limit,
-          totalPages: Math.ceil(count / query.limit),
-        },
+        ...this.prismaService.formatPaginationResponse({
+          page: pagination.page,
+          count,
+          limit: pagination.take,
+        }),
       };
     });
   }
  findOne(id: number) {
     return this.prismaService.product.findUnique({
       where: { id },
+      include: { Asset: true },
     });
   }
     // update fileId in db if exist in payload
@@ -123,7 +124,12 @@ export class ProductService {
     return updatedProduct;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
-  }
+
+  
+  remove(id: number, user: Express.Request['user']) {
+    return this.prismaService.product.update({
+      where: { id, merchantId: Number(user!.id) },
+      data: { isDeleted: true },
+    });
+}
 }

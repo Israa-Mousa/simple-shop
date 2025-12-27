@@ -18,7 +18,7 @@ import type { ProductQuery } from './types/product.types';
 import type { CreateProductDTO, ProductResponseDTO, UpdateProductDTO } from './types/product.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ZodValidationPipe } from 'src/pipe/zod-validation.pipe';
-import { productValidationSchema, updateProductValidationSchema } from './util/proudct.validation.schema';
+import { productSchema, productValidationSchema, updateProductValidationSchema } from './util/proudct.validation.schema';
 import { Roles } from 'src/decorators/role.decorato';
 
 @Controller('product')
@@ -40,14 +40,10 @@ export class ProductController {
   }
 
 
-    @Roles(['MERCHANT', 'CUSTOMER'])
- @Get()
-  findAll(@Query() query: ProductQuery) {
-    return this.productService.findAll({
-      limit: Number(query.limit),
-      page: Number(query.page),
-      name: query.name,
-    });
+   @Roles(['MERCHANT', 'CUSTOMER'])
+  @Get()
+  findAll(@Query(new ZodValidationPipe(productSchema)) query: ProductQuery) {
+    return this.productService.findAll(query);
   }
   @Roles(['MERCHANT', 'CUSTOMER'])
   @Get(':id')
@@ -69,8 +65,12 @@ export class ProductController {
     return this.productService.update(id, updatePayload, request.user, file);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+ @Delete(':id')
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() request: Express.Request,
+  ) {
+    return this.productService.remove(id, request.user);
   }
+
 }

@@ -9,12 +9,14 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { ProductModule } from './modules/product/product.module';
 import { FileModule } from './modules/file/file.module';
+import { OrderModule } from './module/order/order.module';
+import { OrderModule } from './modules/order/order.module';
 
 @Module({
   imports: [AuthModule, UserModule
     , DatabaseModule,ConfigModule.forRoot({
       isGlobal: true,
-    }), ProductModule, FileModule,
+    }), ProductModule, FileModule, OrderModule,
     
   ],
   controllers: [AppController],
