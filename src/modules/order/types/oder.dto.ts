@@ -28,12 +28,12 @@ export type OrderOverviewResponseDTO = Prisma.OrderGetPayload<{
 }>;
 
 
-const ordersExample: CreateOrderDTO = [
-  { productId: 1, qty: 2 },
-  { productId: 3, qty: 1 },
-];
-console.log(ordersExample);
-// export type CreateOrderReturnDTO = {
-//   orderId: number;
-//   items: { productId: number; qty: number }[];
-// }; 
+// const ordersExample: CreateOrderDTO = [
+//   { productId: 1, qty: 2 },
+//   { productId: 3, qty: 1 },
+// ];
+// console.log(ordersExample);
+export type CreateOrderReturnDTO = {
+  orderId: number;
+  items: { productId: number; qty: number }[];
+}; 

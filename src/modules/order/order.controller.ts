@@ -3,7 +3,8 @@ import { OrderService } from './order.service';
 import { Roles } from 'src/decorators/role.decorato';
 import { ZodValidationPipe } from 'src/pipe/zod-validation.pipe';
 import { createOrderDTOValidationSchema } from './util/order.validation.schema';
-import type { CreateOrderDTO, CreateOrderResponseDTO, OrderOverviewResponseDTO, OrderResponseDTO } from './types/oder.dto';
+import type { CreateOrderDTO, CreateOrderResponseDTO, CreateOrderReturnDTO, OrderOverviewResponseDTO, OrderResponseDTO } from './types/oder.dto';
+import   { createReturnDTOValidationSchema } from './util/order.validation.schema';
 import { paginationSchema } from 'src/utils/api.utils';
 import type { PaginatedResult, PaginationQueryType } from 'src/types/util.types';
 import { Or } from 'generated/prisma/runtime/library';
@@ -49,5 +50,19 @@ export class OrderController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.orderService.remove(+id);
+  }
+
+  /// Return Order Items
+    // create return
+  @Post('return')
+  createReturn(
+    @Body(new ZodValidationPipe(createReturnDTOValidationSchema))
+    createReturnDto: CreateOrderReturnDTO,
+    @Req() request: Express.Request,
+  ): Promise<OrderResponseDTO> {
+    return this.orderService.createReturn(
+      createReturnDto,
+      BigInt(request.user!.id),
+    );
   }
 }

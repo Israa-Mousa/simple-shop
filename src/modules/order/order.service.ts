@@ -1,5 +1,5 @@
 import { BadRequestException, Get, Injectable, Param, Query, Req } from '@nestjs/common';
-import type { CreateOrderDTO, OrderOverviewResponseDTO, OrderResponseDTO } from './types/oder.dto';
+import type { CreateOrderDTO, CreateOrderReturnDTO, OrderOverviewResponseDTO, OrderResponseDTO } from './types/oder.dto';
 import { DatabaseService } from '../database/database.service';
 import { Decimal } from 'generated/prisma/runtime/library';
 import { MoneyUtil } from 'src/utils/money.util';
@@ -129,5 +129,64 @@ export class OrderService {
       };
     });
   }
+
+  async createReturn(createReturnDto: CreateOrderReturnDTO, userId: bigint) {
+    const returnedProductsIdsInDTO = createReturnDto.items.map(
+      (item) => item.productId,
+    );
+    await this.prismaService.$transaction(async (prismaTX) => {
+      // is order belong to same user
+
+      await prismaTX.order.findUniqueOrThrow({
+        where: {
+          userId,
+          id: createReturnDto.orderId,
+        },
+      });
+      // validate returns product ids already included in order && return qty is witin capacity total qty
+      const existingOrderProducts = await prismaTX.orderProduct.findMany({
+        where: {
+          orderId: createReturnDto.orderId,
+          productId: {
+            in: returnedProductsIdsInDTO,
+          },
+        },
+      });
+      if (returnedProductsIdsInDTO.length !== existingOrderProducts.length) {
+        throw new BadRequestException('Invalid return products');
+      }
+      // create return ({ returenditems:[createm]})
+
+      await prismaTX.orderReturn.create({
+        data: {
+          orderId: BigInt(createReturnDto.orderId),
+           status: 'PENDING',
+          returnedItems: {
+            createMany: { data: createReturnDto.items },
+          },
+        },
+      });
+      // order_product - decrement qty
+
+      for (const item of createReturnDto.items) {
+        await prismaTX.orderProduct.update({
+          where: {
+            orderId_productId: {
+              orderId: createReturnDto.orderId,
+              productId: item.productId,
+            },
+          },
+          data: {
+            totalQty: {
+              increment: -item.qty,
+            },
+          },
+        });
+      }
+    });
+
+    return this.findOne(createReturnDto.orderId, userId);
+  }
+
 }
 
