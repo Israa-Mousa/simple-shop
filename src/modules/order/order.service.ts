@@ -1,20 +1,23 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import type { CreateOrderDTO, OrderResponseDTO } from './types/oder.dto';
+import { BadRequestException, Get, Injectable, Param, Query, Req } from '@nestjs/common';
+import type { CreateOrderDTO, OrderOverviewResponseDTO, OrderResponseDTO } from './types/oder.dto';
 import { DatabaseService } from '../database/database.service';
 import { Decimal } from 'generated/prisma/runtime/library';
 import { MoneyUtil } from 'src/utils/money.util';
 import { Prisma, Product } from 'generated/prisma/wasm';
+import type { PaginatedResult, PaginationQueryType } from 'src/types/util.types';
+import { removeFields } from 'src/utils/object.utils';
 
 @Injectable()
 export class OrderService {
-    constructor(private readonly primsaService: DatabaseService) {}
+  orderService: any;
+  constructor(private readonly prismaService: DatabaseService) {}
   async create(createOrderDto: CreateOrderDTO, userId: number | bigint) {
     // MISSING order total
     // missing product price
 
     const productIds = createOrderDto.map((item) => item.productId);
     // get products
-    const products = await this.primsaService.product.findMany({
+    const products = await this.prismaService.product.findMany({
       where: {
         id: {
           in: productIds,
@@ -40,7 +43,7 @@ export class OrderService {
     );
 
     // create order included created data (transaction , product)
-    const createdOrder = await this.primsaService.order.create({
+    const createdOrder = await this.prismaService.order.create({
       data: {
         orderProducts: {
           createMany: { data: orderProductsData },
@@ -63,14 +66,47 @@ export class OrderService {
     return createdOrder;
   }
 
-  findAll() {
-    return `This action returns all order`;
+  findAll(
+    userId: bigint,
+    query: PaginationQueryType,
+  ): Promise<PaginatedResult<OrderOverviewResponseDTO>> {
+    return this.prismaService.$transaction(async (prisma) => {
+      const pagination = this.prismaService.handleQueryPagination(query);
+
+      const orders = await prisma.order.findMany({
+        ...removeFields(pagination, ['page']),
+        where: { userId },
+        include: {
+          orderProducts: true,
+          orderReturns: true,
+          transactions: true,
+        },
+      });
+
+      const count = await prisma.order.count();
+      return {
+        data: orders,
+        ...this.prismaService.formatPaginationResponse({
+          page: pagination.page,
+          count,
+          limit: pagination.take,
+        }),
+      };
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+  findOne(id: number, userId: bigint) {
+    return this.prismaService.order.findUniqueOrThrow({
+      where: { id, userId },
+      include: {
+        orderProducts: { include: { product: true } },
+        transactions: true,
+        orderReturns: {
+          include: { returnedItems: { include: { product: true } } },
+        },
+      },
+    });
   }
-
   // update(id: number, updateOrderDto: UpdateOrderDto) {
   //   return `This action updates a #${id} order`;
   // }

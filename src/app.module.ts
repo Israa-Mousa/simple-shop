@@ -9,29 +9,29 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { ProductModule } from './modules/product/product.module';
 import { FileModule } from './modules/file/file.module';
-import { OrderModule } from './module/order/order.module';
 import { OrderModule } from './modules/order/order.module';
-
+import { RolesGuard } from './modules/auth/guards/role.guard';
 @Module({
-  imports: [AuthModule, UserModule
-    , DatabaseModule,ConfigModule.forRoot({
+  imports: [
+    ConfigModule.forRoot({
       isGlobal: true,
-    }), ProductModule, FileModule, OrderModule,
-    
+    }),
+    AuthModule,
+    UserModule,
+    DatabaseModule,
+    ProductModule,
+    FileModule,
+    OrderModule,
   ],
-  controllers: [AppController],
- providers: [
-    AppService,
+  providers: [
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
-      
     },
-
-    // {
-    //   provide: APP_GUARD, 
-    //   useClass: RolesGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
   ],
 })
 export class AppModule {}
