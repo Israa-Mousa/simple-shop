@@ -171,7 +171,7 @@ export class OrderService {
       for (const item of createReturnDto.items) {
         await prismaTX.orderProduct.update({
           where: {
-            orderId_productId: {
+            orderId_productId: { 
               orderId: createReturnDto.orderId,
               productId: item.productId,
             },

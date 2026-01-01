@@ -9,6 +9,8 @@ import { paginationSchema } from 'src/utils/api.utils';
 import type { PaginatedResult, PaginationQueryType } from 'src/types/util.types';
 import { Or } from 'generated/prisma/runtime/library';
 import { request } from 'express';
+import { User } from 'src/decorators/user.decorator';
+import { UserResponseDTO } from '../auth/dto/auth.dto';
 
 @Controller('order')
 @Roles(['CUSTOMER'])
@@ -19,8 +21,8 @@ export class OrderController {
   create(
     @Body(new ZodValidationPipe(createOrderDTOValidationSchema))
     createOrderDto: CreateOrderDTO,
-
-    @Req() request: Express.Request,
+ @User() user: UserResponseDTO['user']
+    // @Req() request: Express.Request,
   ): Promise<CreateOrderResponseDTO> {
     return this.orderService.create(createOrderDto, BigInt(request.user!.id));
   }

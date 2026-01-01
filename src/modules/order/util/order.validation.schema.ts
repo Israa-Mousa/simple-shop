@@ -5,8 +5,8 @@ import { ProductQuery } from 'src/modules/product/types/product.types';
 
 export const createOrderDTOValidationSchema = z.array(
   z.object({
-    productId: z.number().min(1),
-    qty: z.number().min(1),
+    productId: z.coerce.number().min(1),
+    qty: z.coerce.number().min(1),
   }),
 ) satisfies ZodType<CreateOrderDTO>;
 
@@ -16,11 +16,11 @@ export const productSchema = paginationSchema.extend({
 
 
 export const createReturnDTOValidationSchema = z.object({
-  orderId: z.number().min(1),
+  orderId: z.coerce.number().min(1),
   items: z.array(
     z.object({
-      productId: z.number().min(1),
-      qty: z.number().min(1),
+      productId: z.coerce.number().min(1),
+      qty: z.coerce.number().min(1),
     }),
   ),
 }) satisfies ZodType<CreateOrderReturnDTO>;
